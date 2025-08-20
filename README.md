@@ -8,6 +8,9 @@ API endpoints are described in [API endpoints](##API-endpoionts) and as a OpenAP
 
 ```
     composer install
+```
+Rename `.env.example` to `.env`
+```
     php artisan key:generate
     php artisan migrate
     php artisan serve
