@@ -1,0 +1,391 @@
+openapi: 3.0.4
+info:
+  title: Agiledrop - demo
+  description: |-
+    Agiledrop - demo
+  version: 1.0.12
+servers:
+  - url: http://127.0.0.1:8000/api
+tags:
+  - name: Authentication
+  - name: Media files
+paths:
+  /register:
+    post:
+      tags:
+        - Authentication
+      summary: Register a new User.
+      description: Register a new User.
+      parameters:
+        - name: Accept
+          in: header
+          required: false
+          schema:
+            type: string
+            example: application/json
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name: 
+                  type: string
+                email:
+                  type: string
+                password:
+                  type: string
+              required:
+                - name
+                - email
+      responses:
+        '200':
+          description: Successful operation
+          content:
+              application/json:
+                schema:
+                  type: object
+                  properties:
+                    status:
+                      type: string
+        '422':
+          description: Validation exception
+  /login:
+    post:
+      tags:
+        - Authentication
+      summary: Login an exisisting User.
+      description: Login an exisisting User.
+      parameters:
+        - name: Accept
+          in: header
+          required: false
+          schema:
+            type: string
+            example: application/json
+
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                password:
+                  type: string
+              required:
+                - email
+                - password
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                  access_token:
+                    type: string
+        '401':
+          description: Invalid credentials
+        '422':
+          description: Validation exception
+          
+  /logout:
+    post:
+      tags:
+        - Authentication
+      summary: Logout the authenticated User.
+      description: Logout the authenticated User.
+      parameters:
+        - name: Accept
+          in: header
+          required: false
+          schema:
+            type: string
+            example: application/json
+        - name: Authorization
+          in: header
+          required: true
+          schema:
+            type: string
+            example: Bearer XXXX
+      security:
+      - bearerAuth: []
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+        '401':
+          description: Unauthenticated
+  
+  /media-files:
+    get:
+      tags:
+        - Media files
+      summary: Fetch all File infos.
+      description: Fetch all File infos.
+      parameters:
+        - name: Accept
+          in: header
+          required: false
+          schema:
+            type: string
+            example: application/json
+        - name: Authorization
+          in: header
+          required: true
+          schema:
+            type: string
+            example: Bearer XXXX
+      security:
+      - bearerAuth: []
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/FileInfo'
+        '401':
+          description: Unauthenticated
+    post:
+      tags:
+        - Media files
+      summary: Upload a File.
+      description: Upload a File.
+      parameters:
+        - name: Accept
+          in: header
+          required: false
+          schema:
+            type: string
+            example: application/json
+        - name: Authorization
+          in: header
+          required: true
+          schema:
+            type: string
+            example: Bearer XXXX
+      security:
+      - bearerAuth: []
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                title:
+                  type: string
+                description:
+                  type: string
+                file:
+                  type: string
+                  format: binary
+              required:
+                - description
+      responses:
+        '201':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FileInfo'
+        '401':
+          description: Unauthenticated
+        '422':
+          description: Validation errors
+  
+  /media-files/{id}:
+    get:
+      tags:
+        - Media files
+      summary: Get specific File info.
+      description: Get specific File info.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            example: 1
+        - name: Accept
+          in: header
+          required: false
+          schema:
+            type: string
+            example: application/json
+        - name: Authorization
+          in: header
+          required: true
+          schema:
+            type: string
+            example: Bearer XXXX
+      security:
+      - bearerAuth: []
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/FileInfo'
+        '401':
+          description: Unauthenticated
+        '404':
+          description: Missing file
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+    delete:
+      tags:
+        - Media files
+      summary: Delete a File.
+      description: Delete a File.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            example: 1
+        - name: Accept
+          in: header
+          required: false
+          schema:
+            type: string
+            example: application/json
+        - name: Authorization
+          in: header
+          required: true
+          schema:
+            type: string
+            example: Bearer XXXX
+      security:
+      - bearerAuth: []
+      responses:
+        '204':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+        '401':
+          description: Unauthenticated
+        '404':
+          description: Missing file
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    
+  /media-files/{id}/download:
+    get:
+      tags:
+        - Media files
+      summary: Download specific File.
+      description: Download specific File.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            example: 1
+        - name: Accept
+          in: header
+          required: false
+          schema:
+            type: string
+            example: application/json
+        - name: Authorization
+          in: header
+          required: true
+          schema:
+            type: string
+            example: Bearer XXXX
+      security:
+      - bearerAuth: []
+      responses:
+        '200':
+          description: File
+          content:
+            image/*:
+              schema:
+                type: string
+                format: binary
+            video/*:
+              schema:
+                type: string
+                format: binary
+        '401':
+          description: Unauthenticated
+        '404':
+          description: Missing file
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+  
+components:
+  schemas:
+    FileInfo:
+      type: object
+      properties:
+        id:
+          type: integer
+        title:
+          type: string
+        description:
+          type: string
+        originalName:
+          type: string
+        path: 
+          type: string
+        mimeType:
+          type: string
+        extension:
+          type: string
+        size:
+          type: integer
+        updated_at:
+          type: string
+          format: date-time
+        created_at:
+          type: string
+          format: date-time
+    
+  securitySchemes:
+    bearerAuth: 
+        type: http
+        scheme: bearer
+    
+      type: apiKey
+      name: api_key
+      in: header
